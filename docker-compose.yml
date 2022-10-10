@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  wanted:
+    build:
+      context: .
+
+    ports:
+    - "8000:8000"
+
+    command: >
+      sh -c "python manage.py wait_for_db && 
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+    environment:
+      - DB_HOST=wanted_db
+      - DB_NAME=wanted
+      - DB_USER=wanted_user
+      - DB_PASS=wanted
+
+    depends_on:
+      - wanted_db
+
+
+  wanted_db:
+    image: postgres:13-alpine
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=wanted
+      - POSTGRES_USER=wanted_user
+      - POSTGRES_PASSWORD=wanted
+  
+volumes:
+  dev-db-data:
