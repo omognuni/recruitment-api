@@ -50,16 +50,16 @@ class PublicAPITests(TestCase):
             'title': 'sample title',
             'position': 'Backend',
             'reward': 100000,
-            'company': self.company,
+            'company': self.company.id,
             'stack': 'Python'
         }
         res = self.client.post(RECRUIT_URL, payload)
 
-        recruit = Recruit.objects.get(id=res.data['id'])
-         
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        for k,v in payload.items():
-            self.assertEqual(getattr(recruit, k), v)
+        
+        recruit = Recruit.objects.get(id=res.data['id'])
+
+        self.assertEqual(str(recruit), payload['title'])
 
     def test_update_recruit(self):
         '''채용 공고 업데이트 테스트'''
@@ -74,30 +74,38 @@ class PublicAPITests(TestCase):
         res = self.client.patch(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
         recruit.refresh_from_db()
 
-        for k,v in payload.items():
-            self.assertEqual(getattr(recruit, k), v)
+        self.assertEqual(recruit.description, payload['description'])
+        # for k,v in payload.items():
+        #     self.assertEqual(getattr(recruit, k), v)
 
     def test_full_update_recruit(self):
         '''채용 공고 전체 업데이트 테스트'''
         recruit = create_recruit(company=self.company)
+        company = Company.objects.create(name='kakao', country='Korea', city='Seoul')
+
         payload = {
             'title': 'sample title2',
             'position': 'Back',
             'reward': 50000,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
+            'company': company.id,
             'stack': 'Python'
         }
 
         url = detail_url(recruit.id)
-        res = self.client.patch(url, payload)
+        res = self.client.put(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         recruit.refresh_from_db()
         
         for k,v in payload.items():
-            self.assertEqual(getattr(recruit, k), v)
+            if k == 'company':
+                self.assertEqual(recruit.company.id, v)
+            else:
+                self.assertEqual(getattr(recruit, k), v)
 
     def test_delete_recruit(self):
         '''채용 공고 삭제 테스트'''
@@ -106,5 +114,5 @@ class PublicAPITests(TestCase):
         url = detail_url(recruit.id)
         res = self.client.delete(url)
 
-        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertTrue(Recruit.objects.filter(id=recruit.id).exists())
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Recruit.objects.filter(id=recruit.id).exists())
