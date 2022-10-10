@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+from core.models import Company
+
 
 class ModelTest(TestCase):
     '''Model CRUD test'''
@@ -23,3 +25,16 @@ class ModelTest(TestCase):
         self.assertEqual(user.username, username)
         self.assertTrue(user.check_password(password))
         self.assertTrue(user.is_superuser)
+
+    def test_create_company_model(self):
+        '''회사 생성 테스트'''
+        kwargs = {
+            'name' : 'Wanted',
+            'country' : 'Korea',
+            'city' : 'Seoul',
+        }
+
+
+        company = Company.objects.create(**kwargs)
+
+        self.assertEqual(str(company), kwargs['name'])
