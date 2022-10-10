@@ -116,3 +116,16 @@ class PublicAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recruit.objects.filter(id=recruit.id).exists())
+
+    def test_detail_recruit(self):
+        '''채용 공고 상세 페이지 테스트'''
+        recruit = create_recruit(company=self.company)
+        
+        for i in range(3):
+            create_recruit(company=self.company)
+
+        url = detail_url(recruit.id)
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(3, len(res.data['related_ad']))
