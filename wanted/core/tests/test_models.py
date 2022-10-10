@@ -1,8 +1,11 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from core.models import Company
+from core.models import Company, Recruit
 
+
+def create_company():
+    return Company.objects.create(name='testname', country='Korea', city='Seoul')
 
 class ModelTest(TestCase):
     '''Model CRUD test'''
@@ -34,7 +37,21 @@ class ModelTest(TestCase):
             'city' : 'Seoul',
         }
 
-
         company = Company.objects.create(**kwargs)
 
         self.assertEqual(str(company), kwargs['name'])
+
+    def test_create_recruit_model(self):
+        '''채용 공고 생성 테스트'''
+        company = create_company()
+        kwargs = {
+            'title': 'sample title',
+            'position': 'FE',
+            'reward': 50000,
+            'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
+            'stack': 'Python'
+
+        }      
+
+        recruit = Recruit.objects.create(**kwargs, company=company)
+        self.assertEqual(str(recruit), recruit.title)
