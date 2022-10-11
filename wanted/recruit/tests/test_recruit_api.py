@@ -1,4 +1,4 @@
-from venv import create
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from recruit.serializers import RecruitSerializer
+
 from core.models import Company, Recruit
 
 
@@ -16,7 +17,7 @@ def detail_url(recruit_id):
     return reverse('recruit:recruit-detail', args=[recruit_id])
 
 
-def create_recruit(company, **params):
+def create_recruit(company, user, **params):
     defaults = {
         'title': 'sample title',
         'position': 'Front',
@@ -24,7 +25,9 @@ def create_recruit(company, **params):
         'description': '원티드랩에서 프론트엔드 주니어 개발자를 채용합니다. 자격요건은..',
         'stack': 'Python'
     }
-    recruit = Recruit.objects.create(company=company, **defaults)
+
+    defaults.update(params)
+    recruit = Recruit.objects.create(company=company, user=user, **defaults)
     return recruit
 
 
@@ -34,11 +37,13 @@ class PublicAPITests(TestCase):
         self.client = APIClient()
         self.company = Company.objects.create(
             name='Wanted', country='Korea', city='Seoul')
+        self.user = get_user_model().objects.create_user(username='testuser',
+                                                         password='testpass', company=self.company)
 
     def test_retrieve_recruit(self):
         '''채용 공고 목록 get 테스트'''
-        create_recruit(company=self.company)
-        create_recruit(company=self.company)
+        create_recruit(company=self.company, user=self.user)
+        create_recruit(company=self.company, user=self.user)
 
         res = self.client.get(RECRUIT_URL)
 
@@ -47,6 +52,36 @@ class PublicAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_detail_recruit(self):
+        '''채용 공고 상세 페이지 테스트'''
+
+        recruit = create_recruit(company=self.company, user=self.user)
+
+        for _ in range(3):
+            create_recruit(company=self.company, user=self.user)
+
+        url = detail_url(recruit.id)
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(3, len(res.data['related_ad']))
+        self.assertFalse(recruit.id in res.data['related_ad'])
+
+
+class PrivateAPITests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.company = Company.objects.create(
+            name='Wanted', country='Korea', city='Seoul')
+
+        self.user = get_user_model().objects.create_user(
+            username='testuser',
+            password='testpass',
+            company=self.company)
+
+        self.client.force_authenticate(self.user)
 
     def test_create_recruit(self):
         '''채용 공고 생성 테스트'''
@@ -67,7 +102,7 @@ class PublicAPITests(TestCase):
 
     def test_update_recruit(self):
         '''채용 공고 업데이트 테스트'''
-        recruit = create_recruit(company=self.company)
+        recruit = create_recruit(company=self.company, user=self.user)
         payload = {
             'reward': 50000,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
@@ -87,7 +122,7 @@ class PublicAPITests(TestCase):
 
     def test_full_update_recruit(self):
         '''채용 공고 전체 업데이트 테스트'''
-        recruit = create_recruit(company=self.company)
+        recruit = create_recruit(company=self.company, user=self.user)
         company = Company.objects.create(
             name='kakao', country='Korea', city='Seoul')
 
@@ -114,24 +149,10 @@ class PublicAPITests(TestCase):
 
     def test_delete_recruit(self):
         '''채용 공고 삭제 테스트'''
-        recruit = create_recruit(company=self.company)
+        recruit = create_recruit(company=self.company, user=self.user)
 
         url = detail_url(recruit.id)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recruit.objects.filter(id=recruit.id).exists())
-
-    def test_detail_recruit(self):
-        '''채용 공고 상세 페이지 테스트'''
-        recruit = create_recruit(company=self.company)
-
-        for _ in range(3):
-            create_recruit(company=self.company)
-
-        url = detail_url(recruit.id)
-        res = self.client.get(url)
-
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(3, len(res.data['related_ad']))
-        self.assertFalse(recruit.id in res.data['related_ad'])
