@@ -11,8 +11,10 @@ from core.models import Company, Recruit
 
 RECRUIT_URL = reverse('recruit:recruit-list')
 
+
 def detail_url(recruit_id):
     return reverse('recruit:recruit-detail', args=[recruit_id])
+
 
 def create_recruit(company, **params):
     defaults = {
@@ -25,11 +27,13 @@ def create_recruit(company, **params):
     recruit = Recruit.objects.create(company=company, **defaults)
     return recruit
 
+
 class PublicAPITests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.company = Company.objects.create(name='Wanted', country='Korea', city='Seoul')
+        self.company = Company.objects.create(
+            name='Wanted', country='Korea', city='Seoul')
 
     def test_retrieve_recruit(self):
         '''채용 공고 목록 get 테스트'''
@@ -56,7 +60,7 @@ class PublicAPITests(TestCase):
         res = self.client.post(RECRUIT_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        
+
         recruit = Recruit.objects.get(id=res.data['id'])
 
         self.assertEqual(str(recruit), payload['title'])
@@ -64,7 +68,7 @@ class PublicAPITests(TestCase):
     def test_update_recruit(self):
         '''채용 공고 업데이트 테스트'''
         recruit = create_recruit(company=self.company)
-        payload ={
+        payload = {
             'reward': 50000,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
             'stack': 'Django'
@@ -74,7 +78,7 @@ class PublicAPITests(TestCase):
         res = self.client.patch(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        
+
         recruit.refresh_from_db()
 
         self.assertEqual(recruit.description, payload['description'])
@@ -84,7 +88,8 @@ class PublicAPITests(TestCase):
     def test_full_update_recruit(self):
         '''채용 공고 전체 업데이트 테스트'''
         recruit = create_recruit(company=self.company)
-        company = Company.objects.create(name='kakao', country='Korea', city='Seoul')
+        company = Company.objects.create(
+            name='kakao', country='Korea', city='Seoul')
 
         payload = {
             'title': 'sample title2',
@@ -100,8 +105,8 @@ class PublicAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         recruit.refresh_from_db()
-        
-        for k,v in payload.items():
+
+        for k, v in payload.items():
             if k == 'company':
                 self.assertEqual(recruit.company.id, v)
             else:
@@ -110,7 +115,7 @@ class PublicAPITests(TestCase):
     def test_delete_recruit(self):
         '''채용 공고 삭제 테스트'''
         recruit = create_recruit(company=self.company)
-        
+
         url = detail_url(recruit.id)
         res = self.client.delete(url)
 
@@ -120,8 +125,8 @@ class PublicAPITests(TestCase):
     def test_detail_recruit(self):
         '''채용 공고 상세 페이지 테스트'''
         recruit = create_recruit(company=self.company)
-        
-        for i in range(3):
+
+        for _ in range(3):
             create_recruit(company=self.company)
 
         url = detail_url(recruit.id)
