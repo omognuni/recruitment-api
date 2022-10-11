@@ -17,7 +17,7 @@ def detail_url(recruit_id):
     return reverse('recruit:recruit-detail', args=[recruit_id])
 
 
-def create_recruit(company, user, **params):
+def create_recruit(company, **params):
     defaults = {
         'title': 'sample title',
         'position': 'Front',
@@ -27,7 +27,7 @@ def create_recruit(company, user, **params):
     }
 
     defaults.update(params)
-    recruit = Recruit.objects.create(company=company, user=user, **defaults)
+    recruit = Recruit.objects.create(company=company, **defaults)
     return recruit
 
 
@@ -38,12 +38,13 @@ class PublicAPITests(TestCase):
         self.company = Company.objects.create(
             name='Wanted', country='Korea', city='Seoul')
         self.user = get_user_model().objects.create_user(username='testuser',
-                                                         password='testpass', company=self.company)
+                                                         password='testpass'
+                                                         )
 
     def test_retrieve_recruit(self):
         '''채용 공고 목록 get 테스트'''
-        create_recruit(company=self.company, user=self.user)
-        create_recruit(company=self.company, user=self.user)
+        create_recruit(company=self.company)
+        create_recruit(company=self.company)
 
         res = self.client.get(RECRUIT_URL)
 
@@ -56,10 +57,10 @@ class PublicAPITests(TestCase):
     def test_detail_recruit(self):
         '''채용 공고 상세 페이지 테스트'''
 
-        recruit = create_recruit(company=self.company, user=self.user)
+        recruit = create_recruit(company=self.company)
 
         for _ in range(3):
-            create_recruit(company=self.company, user=self.user)
+            create_recruit(company=self.company)
 
         url = detail_url(recruit.id)
         res = self.client.get(url)
@@ -79,7 +80,7 @@ class PrivateAPITests(TestCase):
         self.user = get_user_model().objects.create_user(
             username='testuser',
             password='testpass',
-            company=self.company)
+            )
 
         self.client.force_authenticate(self.user)
 
@@ -102,7 +103,7 @@ class PrivateAPITests(TestCase):
 
     def test_update_recruit(self):
         '''채용 공고 업데이트 테스트'''
-        recruit = create_recruit(company=self.company, user=self.user)
+        recruit = create_recruit(company=self.company)
         payload = {
             'reward': 50000,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
@@ -122,7 +123,7 @@ class PrivateAPITests(TestCase):
 
     def test_full_update_recruit(self):
         '''채용 공고 전체 업데이트 테스트'''
-        recruit = create_recruit(company=self.company, user=self.user)
+        recruit = create_recruit(company=self.company)
         company = Company.objects.create(
             name='kakao', country='Korea', city='Seoul')
 
@@ -149,10 +150,11 @@ class PrivateAPITests(TestCase):
 
     def test_delete_recruit(self):
         '''채용 공고 삭제 테스트'''
-        recruit = create_recruit(company=self.company, user=self.user)
+        recruit = create_recruit(company=self.company)
 
         url = detail_url(recruit.id)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recruit.objects.filter(id=recruit.id).exists())
+        

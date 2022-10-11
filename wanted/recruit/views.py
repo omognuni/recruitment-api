@@ -10,9 +10,7 @@ class RecruitViewSet(viewsets.ModelViewSet):
     queryset = Recruit.objects.all()
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    
 
     def get_serializer_class(self):
         if self.action == 'list':

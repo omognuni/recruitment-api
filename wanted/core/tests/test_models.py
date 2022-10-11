@@ -32,19 +32,6 @@ class ModelTest(TestCase):
         self.assertTrue(user.check_password(password))
         self.assertTrue(user.is_superuser)
 
-    def test_create_user_with_company(self):
-        '''user에 company id 추가 테스트'''
-        username = 'wanted'
-        password = 'testpass'
-        company = create_company()
-
-        user = get_user_model().objects.create_user(
-            username=username, password=password, company=company)
-
-        self.assertEqual(user.username, username)
-        self.assertTrue(user.check_password(password))
-        self.assertEqual(user.company.id, company.id)
-
     def test_create_company_model(self):
         '''회사 생성 테스트'''
         kwargs = {
@@ -61,7 +48,7 @@ class ModelTest(TestCase):
         '''채용 공고 생성 테스트'''
         company = create_company()
         user = get_user_model().objects.create_user(
-            username='testuser', password='testpass', company=company)
+            username='testuser', password='testpass')
 
         kwargs = {
             'title': 'sample title',
@@ -69,7 +56,6 @@ class ModelTest(TestCase):
             'reward': 50000,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
             'stack': 'Python',
-            'user': user
         }
 
         recruit = Recruit.objects.create(**kwargs, company=company)
