@@ -1,13 +1,15 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 
 class Company(models.Model):
-    name = models.CharField(max_length=255,unique=True)
+    name = models.CharField(max_length=255, unique=True)
     country = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
+
 
 class Recruit(models.Model):
     title = models.CharField(max_length=255)
@@ -19,3 +21,11 @@ class Recruit(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class User(AbstractUser):
+    company = models.ForeignKey(
+        'Company', on_delete=models.SET_NULL, blank=True, null=True)
+
+    def __str__(self):
+        return self.username
