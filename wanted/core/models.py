@@ -25,6 +25,19 @@ class Recruit(models.Model):
         return self.title
 
 
+class Apply(models.Model):
+    recruit = models.ForeignKey('Recruit', on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recruit', 'user'],
+                name='unique_apply',
+            ),
+        ]
+    
+    
 class User(AbstractUser):
 
     def __str__(self):
