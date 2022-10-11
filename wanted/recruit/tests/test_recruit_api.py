@@ -16,6 +16,8 @@ RECRUIT_URL = reverse('recruit:recruit-list')
 def detail_url(recruit_id):
     return reverse('recruit:recruit-detail', args=[recruit_id])
 
+def recruit_apply_url(recruit_id):
+    return reverse('recruit:recruit-apply', args=[recruit_id])
 
 def create_recruit(company, **params):
     defaults = {
@@ -113,6 +115,11 @@ class PrivateAPITests(TestCase):
         recruit = Recruit.objects.get(id=res.data['id'])
 
         self.assertEqual(str(recruit), payload['title'])
+        for k, v in payload.items():
+            if k == 'company':
+                self.assertEqual(recruit.company.id, v)
+            else:
+                self.assertEqual(getattr(recruit, k), v)
 
     def test_update_recruit(self):
         '''채용 공고 업데이트 테스트'''
@@ -131,8 +138,11 @@ class PrivateAPITests(TestCase):
         recruit.refresh_from_db()
 
         self.assertEqual(recruit.description, payload['description'])
-        # for k,v in payload.items():
-        #     self.assertEqual(getattr(recruit, k), v)
+        for k, v in payload.items():
+            if k == 'company':
+                self.assertEqual(recruit.company.id, v)
+            else:
+                self.assertEqual(getattr(recruit, k), v)
 
     def test_full_update_recruit(self):
         '''채용 공고 전체 업데이트 테스트'''
@@ -170,4 +180,4 @@ class PrivateAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recruit.objects.filter(id=recruit.id).exists())
-        
+    
