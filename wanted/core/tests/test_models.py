@@ -60,13 +60,16 @@ class ModelTest(TestCase):
     def test_create_recruit_model(self):
         '''채용 공고 생성 테스트'''
         company = create_company()
+        user = get_user_model().objects.create_user(
+            username='testuser', password='testpass', company=company)
+
         kwargs = {
             'title': 'sample title',
             'position': 'FE',
             'reward': 50000,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
-            'stack': 'Python'
-
+            'stack': 'Python',
+            'user': user
         }
 
         recruit = Recruit.objects.create(**kwargs, company=company)
