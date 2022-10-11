@@ -68,6 +68,19 @@ class PublicAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(3, len(res.data['related_ad']))
         self.assertFalse(recruit.id in res.data['related_ad'])
+        
+    def test_create_without_auth_error(self):
+        '''로그인 없이 생성 시 에러 테스트'''
+        payload = {
+            'title': 'sample title',
+            'position': 'Backend',
+            'reward': 100000,
+            'company': self.company.id,
+            'stack': 'Python'
+        }
+        res = self.client.post(RECRUIT_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class PrivateAPITests(TestCase):
