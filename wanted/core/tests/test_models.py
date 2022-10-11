@@ -43,7 +43,7 @@ class ModelTest(TestCase):
 
         self.assertEqual(user.username, username)
         self.assertTrue(user.check_password(password))
-        self.assertEqual(user.company, company.id)
+        self.assertEqual(user.company.id, company.id)
 
     def test_create_company_model(self):
         '''회사 생성 테스트'''
