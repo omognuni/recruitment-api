@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from core.models import Company, Recruit
+from core.models import Company, Recruit, Apply
 
 
 def create_company():
@@ -60,3 +60,20 @@ class ModelTest(TestCase):
 
         recruit = Recruit.objects.create(**kwargs, company=company)
         self.assertEqual(str(recruit), recruit.title)
+
+    def test_create_apply_models(self):
+        '''지원 내역 생성 테스트'''
+        kwargs = {
+            'title': 'sample title',
+            'position': 'FE',
+            'reward': 50000,
+            'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
+            'stack': 'Python',
+        }
+        user = get_user_model().objects.create_user(username='testuser', password='testpass')
+        recruit = Recruit.objects.create(**kwargs)
+        
+        apply = Apply.objects.create(user=user, recruit=recruit)
+        self.assertEqual(apply.user.id, user.id)
+        self.assertEqual(apply.recruit.id, recruit.id)
+        
