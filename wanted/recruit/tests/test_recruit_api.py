@@ -180,4 +180,23 @@ class PrivateAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recruit.objects.filter(id=recruit.id).exists())
-    
+
+    def test_apply_recruit(self):
+        '''채용 공고 지원 테스트'''
+        recruit = create_recruit(company=self.company)
+        
+        url = recruit_apply_url(recruit.id)
+        res = self.client.post(url)
+        
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        
+    def test_duplicate_apply_prohibited(self):
+        '''채용 공고 중복 지원 불가 테스트'''
+        recruit = create_recruit(company=self.company)
+        
+        url = recruit_apply_url(recruit.id)
+        res1 = self.client.post(url)
+        res2 = self.client.post(url)
+        
+        self.assertEqual(res1.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res2.status_code, status.HTTP_400_BAD_REQUEST)
