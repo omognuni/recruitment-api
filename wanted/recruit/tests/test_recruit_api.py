@@ -134,3 +134,4 @@ class PublicAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(3, len(res.data['related_ad']))
+        self.assertFalse(recruit.id in res.data['related_ad'])
