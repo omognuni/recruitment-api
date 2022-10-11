@@ -7,6 +7,7 @@ from core.models import Company, Recruit
 def create_company():
     return Company.objects.create(name='testname', country='Korea', city='Seoul')
 
+
 class ModelTest(TestCase):
     '''Model CRUD test'''
 
@@ -14,7 +15,8 @@ class ModelTest(TestCase):
         '''username으로 유저 생성 테스트'''
         username = 'wanted'
         password = 'testpass'
-        user = get_user_model().objects.create_user(username=username, password=password)
+        user = get_user_model().objects.create_user(
+            username=username, password=password)
 
         self.assertEqual(user.username, username)
         self.assertTrue(user.check_password(password))
@@ -23,18 +25,32 @@ class ModelTest(TestCase):
         '''superuser 생성 테스트'''
         username = 'wantedsuper'
         password = 'testpass'
-        user = get_user_model().objects.create_superuser(username=username, password=password)
+        user = get_user_model().objects.create_superuser(
+            username=username, password=password)
 
         self.assertEqual(user.username, username)
         self.assertTrue(user.check_password(password))
         self.assertTrue(user.is_superuser)
 
+    def test_create_user_with_company(self):
+        '''user에 company id 추가 테스트'''
+        username = 'wanted'
+        password = 'testpass'
+        company = create_company()
+
+        user = get_user_model().objects.create_user(
+            username=username, password=password, company=company)
+
+        self.assertEqual(user.username, username)
+        self.assertTrue(user.check_password(password))
+        self.assertEqual(user.company, company.id)
+
     def test_create_company_model(self):
         '''회사 생성 테스트'''
         kwargs = {
-            'name' : 'Wanted',
-            'country' : 'Korea',
-            'city' : 'Seoul',
+            'name': 'Wanted',
+            'country': 'Korea',
+            'city': 'Seoul',
         }
 
         company = Company.objects.create(**kwargs)
@@ -51,7 +67,7 @@ class ModelTest(TestCase):
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
             'stack': 'Python'
 
-        }      
+        }
 
         recruit = Recruit.objects.create(**kwargs, company=company)
         self.assertEqual(str(recruit), recruit.title)
