@@ -10,6 +10,7 @@ from recruit import views
 router = DefaultRouter()
 
 router.register('recruits', views.RecruitViewSet)
+router.register('companies', views.CompanyViewSet)
 
 app_name='recruit'
 

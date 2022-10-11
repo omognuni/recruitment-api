@@ -2,9 +2,18 @@ from rest_framework import serializers
 
 from django.db.models import Q
 
-from core.models import Recruit
+from core.models import Recruit, Company
 
 
+
+class CompanySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Company
+        fields = ['id', 'name', 'country', 'city']
+        read_only_fields = ['id']
+        
+        
 class RecruitSerializer(serializers.ModelSerializer):
 
     class Meta:
