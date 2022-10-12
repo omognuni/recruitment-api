@@ -23,3 +23,8 @@ class RecruitViewSet(BaseRecruitAttrViewSet):
 class CompanyViewSet(BaseRecruitAttrViewSet):
     serializer_class = serializers.CompanySerializer
     queryset = Company.objects.all()
+
+
+class ApplyViewSet(BaseRecruitAttrViewSet):
+    serializer_class = serializers.ApplySerializer
+    queryset = Apply.objects.all()

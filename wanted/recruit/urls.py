@@ -11,8 +11,9 @@ router = DefaultRouter()
 
 router.register('recruits', views.RecruitViewSet)
 router.register('companies', views.CompanyViewSet)
+router.register('applies', views.ApplyViewSet)
 
-app_name='recruit'
+app_name = 'recruit'
 
 urlpatterns = [
     path('', include(router.urls)),

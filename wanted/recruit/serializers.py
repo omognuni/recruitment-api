@@ -1,19 +1,19 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from django.db.models import Q
 
-from core.models import Recruit, Company
-
+from core.models import Recruit, Company, Apply
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Company
         fields = ['id', 'name', 'country', 'city']
         read_only_fields = ['id']
-        
-        
+
+
 class RecruitSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -36,3 +36,16 @@ class RecruitDetailSerializer(RecruitSerializer):
 
     class Meta(RecruitSerializer.Meta):
         fields = RecruitSerializer.Meta.fields + ['description', 'related_ad']
+
+
+class ApplySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Apply
+        fields = ['recruit', 'user']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Apply.objects.all(),
+                fields=['recruit', 'user']
+            )
+        ]
