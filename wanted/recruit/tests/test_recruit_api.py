@@ -16,8 +16,10 @@ RECRUIT_URL = reverse('recruit:recruit-list')
 def detail_url(recruit_id):
     return reverse('recruit:recruit-detail', args=[recruit_id])
 
+
 def recruit_apply_url(recruit_id):
     return reverse('recruit:recruit-apply', args=[recruit_id])
+
 
 def create_recruit(company, **params):
     defaults = {
@@ -70,7 +72,7 @@ class PublicAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(3, len(res.data['related_ad']))
         self.assertFalse(recruit.id in res.data['related_ad'])
-        
+
     def test_create_without_auth_error(self):
         '''로그인 없이 생성 시 에러 테스트'''
         payload = {
@@ -95,7 +97,7 @@ class PrivateAPITests(TestCase):
         self.user = get_user_model().objects.create_user(
             username='testuser',
             password='testpass',
-            )
+        )
 
         self.client.force_authenticate(self.user)
 
@@ -180,23 +182,3 @@ class PrivateAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recruit.objects.filter(id=recruit.id).exists())
-
-    def test_apply_recruit(self):
-        '''채용 공고 지원 테스트'''
-        recruit = create_recruit(company=self.company)
-        
-        url = recruit_apply_url(recruit.id)
-        res = self.client.post(url)
-        
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        
-    def test_duplicate_apply_prohibited(self):
-        '''채용 공고 중복 지원 불가 테스트'''
-        recruit = create_recruit(company=self.company)
-        
-        url = recruit_apply_url(recruit.id)
-        res1 = self.client.post(url)
-        res2 = self.client.post(url)
-        
-        self.assertEqual(res1.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(res2.status_code, status.HTTP_400_BAD_REQUEST)

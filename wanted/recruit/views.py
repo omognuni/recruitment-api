@@ -1,16 +1,18 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
-from core.models import Recruit, Company
+from core.models import Recruit, Company, Apply
 from recruit import serializers
 
 
-class RecruitViewSet(viewsets.ModelViewSet):
+class BaseRecruitAttrViewSet(viewsets.ModelViewSet):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+
+class RecruitViewSet(BaseRecruitAttrViewSet):
     serializer_class = serializers.RecruitDetailSerializer
     queryset = Recruit.objects.all()
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -18,8 +20,11 @@ class RecruitViewSet(viewsets.ModelViewSet):
         return self.serializer_class
 
 
-class CompanyViewSet(viewsets.ModelViewSet):
+class CompanyViewSet(BaseRecruitAttrViewSet):
     serializer_class = serializers.CompanySerializer
     queryset = Company.objects.all()
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class ApplyViewSet(BaseRecruitAttrViewSet):
+    serializer_class = serializers.ApplySerializer
+    queryset = Apply.objects.all()
