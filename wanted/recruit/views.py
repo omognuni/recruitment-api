@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
 from core.models import Recruit, Company, Apply
 from recruit import serializers
@@ -7,7 +7,7 @@ from recruit import serializers
 
 class BaseRecruitAttrViewSet(viewsets.ModelViewSet):
     authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
 
 class RecruitViewSet(BaseRecruitAttrViewSet):
