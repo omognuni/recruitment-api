@@ -175,7 +175,21 @@ class PrivateAPITests(TestCase):
 
         for k, v in payload.items():
             self.assertEqual(getattr(recruit, k), v)
+            
+    def test_update_recruit_with_invalid_company_error(self):
+        '''유효하지 않은 회사로 채용 공고 업데이트 시 에러'''
+        recruit = create_recruit(company=self.company)
+        payload = {
+            'company': 'Kakao',
+            'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
+            'stack': 'Django'
+        }
 
+        url = detail_url(recruit.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        
     def test_delete_recruit(self):
         '''채용 공고 삭제 테스트'''
         recruit = create_recruit(company=self.company)
