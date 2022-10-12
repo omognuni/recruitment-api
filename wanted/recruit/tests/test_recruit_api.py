@@ -20,6 +20,15 @@ def detail_url(recruit_id):
 def recruit_apply_url(recruit_id):
     return reverse('recruit:recruit-apply', args=[recruit_id])
 
+def create_company(**params):
+    defaults = {
+        'name': 'testname',
+        'country': 'Korea',
+        'city': 'Seoul',
+    }
+    
+    defaults.update(params)
+    return Company.objects.create(**defaults)
 
 def create_recruit(company, **params):
     defaults = {
@@ -107,7 +116,7 @@ class PrivateAPITests(TestCase):
             'title': 'sample title',
             'position': 'Backend',
             'reward': 100000,
-            'company': self.company.id,
+            'company': self.company,
             'stack': 'Python'
         }
         res = self.client.post(RECRUIT_URL, payload)
@@ -118,10 +127,7 @@ class PrivateAPITests(TestCase):
 
         self.assertEqual(str(recruit), payload['title'])
         for k, v in payload.items():
-            if k == 'company':
-                self.assertEqual(recruit.company.id, v)
-            else:
-                self.assertEqual(getattr(recruit, k), v)
+            self.assertEqual(getattr(recruit, k), v)
 
     def test_update_recruit(self):
         '''채용 공고 업데이트 테스트'''
@@ -157,7 +163,7 @@ class PrivateAPITests(TestCase):
             'position': 'Back',
             'reward': 50000,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
-            'company': company.id,
+            'company': company,
             'stack': 'Python'
         }
 
@@ -168,10 +174,7 @@ class PrivateAPITests(TestCase):
         recruit.refresh_from_db()
 
         for k, v in payload.items():
-            if k == 'company':
-                self.assertEqual(recruit.company.id, v)
-            else:
-                self.assertEqual(getattr(recruit, k), v)
+            self.assertEqual(getattr(recruit, k), v)
 
     def test_delete_recruit(self):
         '''채용 공고 삭제 테스트'''
@@ -182,3 +185,39 @@ class PrivateAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recruit.objects.filter(id=recruit.id).exists())
+
+    def test_search_recruit_by_stack(self):
+        '''채용 공고 사용기술 검색 구현'''
+        create_recruit(company=self.company, stack='Django')
+        create_recruit(company=self.company, stack='JS')
+        create_recruit(company=self.company, stack='Python')
+        params = {'search': 'Django'}
+        
+        res = self.client.get(RECRUIT_URL, params)
+        recruit = Recruit.objects.get(stack='Django')
+        serializer = RecruitSerializer(recruit)
+        
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]['stack'], 'Django')
+        self.assertEqual(res.data[0], serializer.data)
+
+    def test_search_recruit_by_stack(self):
+        '''채용 공고 ghltk 검색 구현'''
+        create_recruit(company=self.company, stack='Django')
+        kakao = create_company(name='Kakao')
+        create_recruit(company=kakao, stack='JS')
+        naver = create_company(name='Naver')
+        create_recruit(company=naver, stack='Python')
+        params = {'search': 'Wanted'}
+        
+        res = self.client.get(RECRUIT_URL, params)
+        recruit = Recruit.objects.get(company=self.company)
+        serializer = RecruitSerializer(recruit)
+        
+        # self.assertEqual(len(res.data), 1)
+        # self.assertEqual(res.data[0]['company'], 'Wanted')
+        self.assertEqual(res.data[0], serializer.data)
+        
+    
+        
+        
