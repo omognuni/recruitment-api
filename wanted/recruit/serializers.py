@@ -15,7 +15,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class RecruitSerializer(serializers.ModelSerializer):
-
+    # company_name = serializers.CharField(source='company.name')
     class Meta:
         model = Recruit
         fields = ['id', 'title', 'position', 'company', 'reward', 'stack']
@@ -28,7 +28,7 @@ class RecruitDetailSerializer(RecruitSerializer):
 
     def get_related_ad(self, obj):
         recruits = Recruit.objects.filter(
-            company=obj.company.id).filter(~Q(id=obj.id)).values('id')
+            company=obj.company).filter(~Q(id=obj.id)).values('id')
 
         data = [recruit['id'] for recruit in recruits]
 
