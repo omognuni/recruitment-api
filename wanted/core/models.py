@@ -18,7 +18,7 @@ class Recruit(models.Model):
     reward = models.IntegerField()
     description = models.TextField(blank=True)
     company = models.ForeignKey(
-        'Company', on_delete=models.SET_NULL, blank=True, null=True)
+        'Company',to_field='name', on_delete=models.SET_NULL, blank=True, null=True)
     stack = models.CharField(max_length=255)
 
     def __str__(self):
