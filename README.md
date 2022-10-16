@@ -23,12 +23,12 @@
 ##### 1. 채용 공고를 등록
 - Method: POST
 - URL: /api/recruit/recruits/
-- 제목, 회사이름, 포지션, 보상금, 채용 내용, 사용기술을 입력하여 채용 공고를 등록합니다.
+- 제목, 회사 id, 포지션, 보상금, 채용 내용, 사용기술을 입력하여 채용 공고를 등록합니다.
 ```
 {
     "title": "원티드 백엔드",
     "position": "백엔드",
-    "company": 원티드,
+    "company": 1,
     "reward": 100000,
     "stack": "Python",
     "description": "Django"
