@@ -58,7 +58,7 @@ class ModelTest(TestCase):
             'stack': 'Python',
         }
 
-        recruit = Recruit.objects.create(**kwargs, company=company)
+        recruit = Recruit.objects.create(**kwargs, company_id=company)
         self.assertEqual(str(recruit), recruit.title)
 
     def test_create_apply_models(self):

@@ -40,7 +40,7 @@ def create_recruit(company, **params):
     }
 
     defaults.update(params)
-    recruit = Recruit.objects.create(company=company, **defaults)
+    recruit = Recruit.objects.create(company_id=company, **defaults)
     return recruit
 
 
@@ -88,7 +88,7 @@ class PublicAPITests(TestCase):
             'title': 'sample title',
             'position': 'Backend',
             'reward': 100000,
-            'company': self.company.id,
+            'company_id': self.company.id,
             'stack': 'Python'
         }
         res = self.client.post(RECRUIT_URL, payload)
@@ -116,7 +116,7 @@ class PrivateAPITests(TestCase):
             'title': 'sample title',
             'position': 'Backend',
             'reward': 100000,
-            'company': self.company,
+            'company_id': self.company.id,
             'stack': 'Python'
         }
         res = self.client.post(RECRUIT_URL, payload)
@@ -127,7 +127,10 @@ class PrivateAPITests(TestCase):
 
         self.assertEqual(str(recruit), payload['title'])
         for k, v in payload.items():
-            self.assertEqual(getattr(recruit, k), v)
+            if k == 'company_id':
+                self.assertEqual(getattr(recruit,k), self.company)
+            else:
+                self.assertEqual(getattr(recruit, k), v)
 
     def test_update_recruit(self):
         '''채용 공고 업데이트 테스트'''
@@ -147,10 +150,7 @@ class PrivateAPITests(TestCase):
 
         self.assertEqual(recruit.description, payload['description'])
         for k, v in payload.items():
-            if k == 'company':
-                self.assertEqual(recruit.company.id, v)
-            else:
-                self.assertEqual(getattr(recruit, k), v)
+            self.assertEqual(getattr(recruit, k), v)
 
     def test_full_update_recruit(self):
         '''채용 공고 전체 업데이트 테스트'''
@@ -163,7 +163,7 @@ class PrivateAPITests(TestCase):
             'position': 'Back',
             'reward': 50000,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
-            'company': company,
+            'company_id': company.id,
             'stack': 'Python'
         }
 
@@ -174,13 +174,16 @@ class PrivateAPITests(TestCase):
         recruit.refresh_from_db()
 
         for k, v in payload.items():
-            self.assertEqual(getattr(recruit, k), v)
+            if k == 'company_id':
+                self.assertEqual(getattr(recruit,k), company)
+            else:
+                self.assertEqual(getattr(recruit, k), v)
             
     def test_update_recruit_with_invalid_company_error(self):
         '''유효하지 않은 회사로 채용 공고 업데이트 시 에러'''
         recruit = create_recruit(company=self.company)
         payload = {
-            'company': 'Kakao',
+            'company_id': 999,
             'description': '원티드랩에서 백엔드 주니어 개발자를 채용합니다. 자격요건은..',
             'stack': 'Django'
         }
@@ -215,8 +218,8 @@ class PrivateAPITests(TestCase):
         self.assertEqual(res.data[0]['stack'], 'Django')
         self.assertEqual(res.data[0], serializer.data)
 
-    def test_search_recruit_by_stack(self):
-        '''채용 공고 ghltk 검색 구현'''
+    def test_search_recruit_by_company(self):
+        '''채용 공고 회사 검색 구현'''
         create_recruit(company=self.company, stack='Django')
         kakao = create_company(name='Kakao')
         create_recruit(company=kakao, stack='JS')
@@ -225,7 +228,7 @@ class PrivateAPITests(TestCase):
         params = {'search': 'Wanted'}
         
         res = self.client.get(RECRUIT_URL, params)
-        recruit = Recruit.objects.get(company=self.company)
+        recruit = Recruit.objects.get(company_id=self.company)
         serializer = RecruitSerializer(recruit)
         
         # self.assertEqual(len(res.data), 1)

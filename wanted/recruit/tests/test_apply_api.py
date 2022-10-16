@@ -34,7 +34,7 @@ def create_recruit(company, **params):
     }
 
     defaults.update(params)
-    recruit = Recruit.objects.create(company=company, **defaults)
+    recruit = Recruit.objects.create(company_id=company, **defaults)
     return recruit
 
 
