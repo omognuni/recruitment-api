@@ -16,13 +16,15 @@ class RecruitViewSet(BaseRecruitAttrViewSet):
     serializer_class = serializers.RecruitDetailSerializer
     queryset = Recruit.objects.all()
     filter_backends = [filters.SearchFilter]
-    search_fields = ['title', 'position', 'company__name', 'stack']
+    search_fields = ['title', 'position', 'company_id__name', 'stack']
 
     def get_serializer_class(self):
         if self.action == 'list':
             return serializers.RecruitSerializer
         return self.serializer_class
-
+    
+    def company_name(self, obj):
+        return obj.company_id.name
 
 class CompanyViewSet(BaseRecruitAttrViewSet):
     serializer_class = serializers.CompanySerializer
