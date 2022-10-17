@@ -16,11 +16,14 @@ class CompanySerializer(serializers.ModelSerializer):
 
 class RecruitSerializer(serializers.ModelSerializer):
     company = serializers.CharField(source='company_id.name', read_only=True)
+
     class Meta:
         model = Recruit
-        fields = ['id', 'title', 'position', 'company_id', 'company', 'reward', 'stack']
+        fields = ['id', 'title', 'position',
+                  'company_id', 'company', 'reward', 'stack']
         read_only_fields = ['id', 'company']
         extra_kwargs = {'company_id': {'write_only': True}}
+
 
 class RecruitDetailSerializer(RecruitSerializer):
     related_ad = serializers.SerializerMethodField(
