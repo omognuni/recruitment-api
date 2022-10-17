@@ -5,7 +5,7 @@
 - Django REST Framework
 - PostgreSQL
 - Docker
-- 
+
 ### 실행 방법
 git에서 클론 후 클론한 폴더에서 다음 명령어를 실행합니다
 ```
