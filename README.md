@@ -5,7 +5,13 @@
 - Django REST Framework
 - PostgreSQL
 - Docker
-
+- 
+### 실행 방법
+git에서 클론 후 클론한 폴더에서 다음 명령어를 실행합니다
+```
+docker-compose up --build
+# localhost:8000/api/user/create로 유저 생성
+```
 ### 요구사항 분석 및 구현 과정
 - 1. 채용 공고를 등록
 - 2. 채용 공고를 수정
@@ -23,12 +29,12 @@
 ##### 1. 채용 공고를 등록
 - Method: POST
 - URL: /api/recruit/recruits/
-- 제목, 회사이름, 포지션, 보상금, 채용 내용, 사용기술을 입력하여 채용 공고를 등록합니다.
+- 제목, 회사 id, 포지션, 보상금, 채용 내용, 사용기술을 입력하여 채용 공고를 등록합니다.
 ```
 {
     "title": "원티드 백엔드",
     "position": "백엔드",
-    "company": 원티드,
+    "company_id": 1,
     "reward": 100000,
     "stack": "Python",
     "description": "Django"
