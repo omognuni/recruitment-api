@@ -15,11 +15,14 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class RecruitSerializer(serializers.ModelSerializer):
-    # company_name = serializers.CharField(source='company.name')
+    company = serializers.CharField(source='company_id.name', read_only=True)
+
     class Meta:
         model = Recruit
-        fields = ['id', 'title', 'position', 'company', 'reward', 'stack']
-        read_only_fields = ['id']
+        fields = ['id', 'title', 'position',
+                  'company_id', 'company', 'reward', 'stack']
+        read_only_fields = ['id', 'company']
+        extra_kwargs = {'company_id': {'write_only': True}}
 
 
 class RecruitDetailSerializer(RecruitSerializer):
@@ -28,7 +31,7 @@ class RecruitDetailSerializer(RecruitSerializer):
 
     def get_related_ad(self, obj):
         recruits = Recruit.objects.filter(
-            company=obj.company).filter(~Q(id=obj.id)).values('id')
+            company_id=obj.company_id).filter(~Q(id=obj.id)).values('id')
 
         data = [recruit['id'] for recruit in recruits]
 
