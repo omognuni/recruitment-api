@@ -176,7 +176,10 @@ class PrivateAPITests(TestCase):
         recruit.refresh_from_db()
 
         for k, v in payload.items():
-            self.assertEqual(getattr(recruit, k), v)
+            if k == 'company_id':
+                self.assertEqual(getattr(recruit, k), company)
+            else:
+                self.assertEqual(getattr(recruit, k), v)
 
     def test_delete_recruit(self):
         '''채용 공고 삭제 테스트'''
