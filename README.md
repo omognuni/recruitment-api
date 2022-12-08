@@ -1,18 +1,19 @@
-## Wanted-pre-onboarding-BE
+## 개요
+- 원티드 프리온보딩 사전과제
 
-### 사용한 기술
+## 사용한 기술
 - Python
 - Django REST Framework
 - PostgreSQL
 - Docker
 
-### 실행 방법
+## 실행 방법
 git에서 클론 후 클론한 폴더에서 다음 명령어를 실행합니다
 ```
 docker-compose up --build
 # localhost:8000/api/user/create로 유저 생성
 ```
-### 요구사항 분석 및 구현 과정
+## 요구사항 분석 및 구현 과정
 - 1. 채용 공고를 등록
 - 2. 채용 공고를 수정
 - 3. 채용 공고를 삭제
