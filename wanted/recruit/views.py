@@ -11,10 +11,10 @@ class BaseRecruitAttrViewSet(viewsets.ModelViewSet):
     authentication_classes = [BasicAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    
+
 class RecruitViewSet(BaseRecruitAttrViewSet):
     serializer_class = serializers.RecruitDetailSerializer
-    queryset = Recruit.objects.all()
+    queryset = Recruit.objects.all().select_related('company_id')
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'position', 'company_id__name', 'stack']
 
@@ -22,9 +22,10 @@ class RecruitViewSet(BaseRecruitAttrViewSet):
         if self.action == 'list':
             return serializers.RecruitSerializer
         return self.serializer_class
-    
-    def company_name(self, obj):
-        return obj.company_id.name
+
+    # def company_name(self, obj):
+    #     return obj.company_id.name
+
 
 class CompanyViewSet(BaseRecruitAttrViewSet):
     serializer_class = serializers.CompanySerializer

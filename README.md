@@ -20,6 +20,33 @@
 - App은 Recruit, User만 생성하여 Recruit App에서 Company, Apply 에 필요한 기능들을 구현했습니다.
 <img src=/images/ERD.png>
 
+### Lazy loading에 따른 N+1 문제
+- 그냥 all로 가져오는 경우
+- 채용공고 수 만큼 쿼리를 더 날림
+
+```python
+    queryset = Recruit.objects.all()
+    '''
+wanted_1     | (0.001) SELECT "core_user"."id", "core_user"."password", "core_user"."last_login", "core_user"."is_superuser", "core_user"."username", "core_user"."first_name", "core_user"."last_name", "core_user"."email", "core_user"."is_staff", "core_user"."is_active", "core_user"."date_joined" FROM "core_user" WHERE "core_user"."id" = 1 LIMIT 21; args=(1,); alias=default
+wanted_1     | (0.000) SELECT "core_recruit"."id", "core_recruit"."title", "core_recruit"."position", "core_recruit"."reward", "core_recruit"."description", "core_recruit"."company_id_id", "core_recruit"."stack" FROM "core_recruit"; args=(); alias=default
+wanted_1     | (0.000) SELECT "core_company"."id", "core_company"."name", "core_company"."country", "core_company"."city" FROM "core_company" WHERE "core_company"."id" = 1 LIMIT 21; args=(1,); alias=default
+wanted_1     | (0.000) SELECT "core_company"."id", "core_company"."name", "core_company"."country", "core_company"."city" FROM "core_company" WHERE "core_company"."id" = 1 LIMIT 21; args=(1,); alias=default
+wanted_1     | (0.000) SELECT "core_company"."id", "core_company"."name", "core_company"."country", "core_company"."city" FROM "core_company" LIMIT 1000; args=(); alias=default
+    '''
+```
+
+- select_related로 해결
+
+```python
+    queryset = Recruit.objects.all().select_related('company_id')
+    '''
+    wanted_1     | (0.001) SELECT "core_user"."id", "core_user"."password", "core_user"."last_login", "core_user"."is_superuser", "core_user"."username", "core_user"."first_name", "core_user"."last_name", "core_user"."email", "core_user"."is_staff", "core_user"."is_active", "core_user"."date_joined" FROM "core_user" WHERE "core_user"."id" = 1 LIMIT 21; args=(1,); alias=default
+    wanted_1     | (0.001) SELECT "core_recruit"."id", "core_recruit"."title", "core_recruit"."position", "core_recruit"."reward", "core_recruit"."description", "core_recruit"."company_id_id", "core_recruit"."stack", "core_company"."id", "core_company"."name", "core_company"."country", "core_company"."city" FROM "core_recruit" LEFT OUTER JOIN "core_company" ON ("core_recruit"."company_id_id" = "core_company"."id"); args=(); alias=default
+    wanted_1     | (0.000) SELECT "core_company"."id", "core_company"."name", "core_company"."country", "core_company"."city" FROM "core_company" LIMIT 1000; args=(); alias=default
+    '''
+```
+
+
 ##### 1. 채용 공고를 등록
 - Method: POST
 - URL: /api/recruit/recruits/
